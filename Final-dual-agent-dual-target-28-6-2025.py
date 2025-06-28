@@ -322,41 +322,6 @@ class RealisticDensityConfig:
                 'beacon_penalty': 2.5   # EXTREME beacon control
             }
 
-
-def update_density_configuration(self, estimated_vehicles_per_km: int):
-    """Dynamically update configuration based on REALISTIC traffic density"""
-    try:
-        # Cap at realistic maximum
-        capped_density = min(estimated_vehicles_per_km, 480)  # Realistic gridlock max
-        
-        new_config = RealisticDensityConfig.get_config_for_density(capped_density)
-        
-        # Update training config dynamically
-        training_config.max_neighbors = new_config['max_neighbors']
-        training_config.cbr_target_base = new_config['cbr_target_base']
-        training_config.sinr_target_base = new_config['sinr_target_base']
-        
-        # Update exploration
-        self.mac_agent.exploration_factor = max(
-            new_config['exploration_factor'], 
-            training_config.min_exploration
-        )
-        
-        # Update centralized trainer interval
-        if hasattr(self, 'centralized_trainer'):
-            self.centralized_trainer.train_interval = new_config['train_interval']
-        
-        logger.info(f"Vehicle {self.node_id}: Updated config for {capped_density} vehicles/km (Channel: {new_config['channel_model']})")
-        logger.info(f"  Max neighbors: {new_config['max_neighbors']}")
-        logger.info(f"  SINR target: {new_config['sinr_target_base']}dB")
-        logger.info(f"  CBR target: {new_config['cbr_target_base']}")
-        
-        if estimated_vehicles_per_km > 480:
-            logger.warning(f"Density {estimated_vehicles_per_km} exceeds realistic maximum (480), capped to gridlock scenario")
-        
-    except Exception as e:
-        logger.error(f"Failed to update density configuration: {e}")
-
 # ==============================
 # Enhanced Logging Setup
 # ==============================
