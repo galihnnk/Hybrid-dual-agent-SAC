@@ -320,15 +320,6 @@ SAC Algorithm: Soft Actor-Critic research and implementations
 - **Real-time Adaptation**: Sub-millisecond response times
 - **Comprehensive Logging**: Detailed performance tracking and analysis
 
-## 📊 Performance Characteristics
-
-| Density Level | Vehicles/km | Channel Model | Algorithm Behavior |
-|---------------|-------------|---------------|-------------------|
-| **Light Traffic** | 60-120 | AWGN/R-LOS | High power, frequent beacons, efficient MCS |
-| **Moderate Traffic** | 120-240 | H-LOS/H-NLOS | Balanced approach, adaptive parameters |
-| **Heavy Traffic** | 240-360 | C-NLOS-ENH | Cooperative behavior, robust settings |
-| **Gridlock** | 360-480 | C-NLOS-ENH Extreme | Survival mode, minimal interference |
-
 ## 🚀 Quick Start
 
 ### Prerequisites
