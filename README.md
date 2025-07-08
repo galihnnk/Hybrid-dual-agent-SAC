@@ -82,47 +82,7 @@ Production Mode (Use trained models):
 bash# Edit the script  
 SCRIPT_MODE = "production"
 
-# Run with trained models
-python hybrid_dual_agent_sac.py
-Configuration Guide
-Training Configurations
-ConfigurationBest ForBuffer SizeExplorationMax NeighborsAggressiveTrainingConfigMaximum performance150,000Minimal (1.8→0.15)50TrainingConfigOptimumBalanced performance120,000Moderate (2.5→0.3)40ConservativeTrainingConfigStable convergence100,000High (2.0→0.4)12
-Realistic Density Scenarios
-python# Light Traffic (30-60 vehicles/km/direction)
-{
-    'max_neighbors': 20,
-    'channel_model': 'AWGN_R-LOS',
-    'cbr_target_base': 0.60,
-    'sinr_target_base': 25.0,
-    'exploration_factor': 2.5
-}
 
-# Moderate Traffic (60-120 vehicles/km/direction)  
-{
-    'max_neighbors': 30,
-    'channel_model': 'H-LOS_H-NLOS',
-    'cbr_target_base': 0.65,
-    'sinr_target_base': 20.0,
-    'exploration_factor': 2.0
-}
-
-# Heavy Traffic (120-180 vehicles/km/direction)
-{
-    'max_neighbors': 40,
-    'channel_model': 'C-NLOS-ENH',
-    'cbr_target_base': 0.70,
-    'sinr_target_base': 16.0,
-    'exploration_factor': 1.5
-}
-
-# Gridlock (180-240 vehicles/km/direction)
-{
-    'max_neighbors': 50,
-    'channel_model': 'C-NLOS-ENH_EXTREME',
-    'cbr_target_base': 0.75,
-    'sinr_target_base': 12.0,
-    'exploration_factor': 1.2
-}
 System Boundaries
 python# Parameter ranges
 system_config.power_min = 1       # Minimum transmission power (dBm)
