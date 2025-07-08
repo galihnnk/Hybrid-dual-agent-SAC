@@ -4,11 +4,295 @@ An advanced **Soft Actor-Critic (SAC)** reinforcement learning system designed s
 
 ## 🎯 Overview
 
-This project implements a sophisticated dual-agent SAC algorithm that optimizes vehicular network parameters in real-time. The system uses two specialized agents:
-- **MAC Agent**: Controls beacon rate and MCS (Modulation and Coding Scheme)
-- **PHY Agent**: Controls transmission power
+Overview
+This hybrid dual-agent RL system addresses the complex challenge of VANET parameter optimization through a novel centralized learning architecture combined with realistic vehicular density modeling. By separating MAC (Medium Access Control) and PHY (Physical) layer responsibilities across two specialized agents, the system achieves superior performance across diverse traffic scenarios from sparse highway conditions to dense urban gridlock.
+Key Features
+Hybrid Architecture
 
-The algorithm adapts to realistic vehicle densities (60-480 vehicles/km) with channel-aware optimization based on IEEE vehicular communication standards.
+Dual-Agent Design: Specialized MAC agent (beacon rate + MCS) and PHY agent (transmission power)
+Realistic Density Modeling: Supports 60-480 vehicles/km based on real-world traffic standards
+Channel-Aware Adaptation: Dynamic adaptation to AWGN, R-LOS, H-LOS, H-NLOS, and C-NLOS-ENH channels
+Multi-Configuration Support: Aggressive, Conservative, and Optimum training configurations
+
+Advanced Density Intelligence
+
+Light Traffic (≤120 vehicles/km): AWGN/R-LOS channel modeling with coverage optimization
+Moderate Traffic (120-240 vehicles/km): H-LOS/H-NLOS with balanced performance
+Heavy Traffic (240-360 vehicles/km): C-NLOS-ENH with interference management
+Gridlock (360-480 vehicles/km): Extreme density survival mode with minimal interference
+
+Production-Ready Features
+
+Auto Model Loading: Seamless deployment with pre-trained models in production mode
+Request-Based Operation: No episode limits - responds until simulation stops
+Real-Time Optimization: Live parameter adjustment during network operation
+Thread-Safe Operation: Concurrent vehicle handling with gradient conflict prevention
+
+Comprehensive Analysis
+
+Excel Reporting: Multi-sheet performance analysis with density-specific metrics
+TensorBoard Integration: Real-time training visualization and monitoring
+Channel Analysis: Detailed behavior analysis across different channel conditions
+Density Transition Tracking: Automatic adaptation to changing traffic scenarios
+
+Intelligent Adaptation
+
+Channel-Aware Rewards: Different optimization strategies per channel condition
+Density-Aware Exploration: Progressive exploration control based on traffic density
+Realistic Safety Bounds: Configurable parameter limits based on vehicular standards
+Performance Validation: Statistical analysis with density-specific correlation detection
+
+Getting Started
+Prerequisites
+bash# Python 3.8 or higher
+python --version
+
+# Core dependencies
+pip install torch numpy pandas openpyxl
+pip install scipy networkx matplotlib
+
+# Optional: TensorBoard for visualization
+pip install tensorboard
+Quick Start
+
+Configure the system (edit script configuration):
+
+python# Set operation mode
+SCRIPT_MODE = "training"  # or "production"
+
+# Configure connection
+system_config.host = '127.0.0.1'
+system_config.port = 5012
+
+# Choose training configuration
+training_config = AggressiveTrainingConfig()    # Maximum performance
+# training_config = ConservativeTrainingConfig() # Stable convergence
+# training_config = TrainingConfigOptimum()      # Balanced approach
+
+Training Mode (Learn new models):
+
+bash# Edit the script
+SCRIPT_MODE = "training"
+
+# Run training
+python hybrid_dual_agent_sac.py
+
+Production Mode (Use trained models):
+
+bash# Edit the script  
+SCRIPT_MODE = "production"
+
+# Run with trained models
+python hybrid_dual_agent_sac.py
+Configuration Guide
+Training Configurations
+ConfigurationBest ForBuffer SizeExplorationMax NeighborsAggressiveTrainingConfigMaximum performance150,000Minimal (1.8→0.15)50TrainingConfigOptimumBalanced performance120,000Moderate (2.5→0.3)40ConservativeTrainingConfigStable convergence100,000High (2.0→0.4)12
+Realistic Density Scenarios
+python# Light Traffic (30-60 vehicles/km/direction)
+{
+    'max_neighbors': 20,
+    'channel_model': 'AWGN_R-LOS',
+    'cbr_target_base': 0.60,
+    'sinr_target_base': 25.0,
+    'exploration_factor': 2.5
+}
+
+# Moderate Traffic (60-120 vehicles/km/direction)  
+{
+    'max_neighbors': 30,
+    'channel_model': 'H-LOS_H-NLOS',
+    'cbr_target_base': 0.65,
+    'sinr_target_base': 20.0,
+    'exploration_factor': 2.0
+}
+
+# Heavy Traffic (120-180 vehicles/km/direction)
+{
+    'max_neighbors': 40,
+    'channel_model': 'C-NLOS-ENH',
+    'cbr_target_base': 0.70,
+    'sinr_target_base': 16.0,
+    'exploration_factor': 1.5
+}
+
+# Gridlock (180-240 vehicles/km/direction)
+{
+    'max_neighbors': 50,
+    'channel_model': 'C-NLOS-ENH_EXTREME',
+    'cbr_target_base': 0.75,
+    'sinr_target_base': 12.0,
+    'exploration_factor': 1.2
+}
+System Boundaries
+python# Parameter ranges
+system_config.power_min = 1       # Minimum transmission power (dBm)
+system_config.power_max = 30      # Maximum transmission power (dBm)
+system_config.beacon_rate_min = 1 # Minimum beacon rate (Hz)
+system_config.beacon_rate_max = 20 # Maximum beacon rate (Hz)
+system_config.mcs_min = 0         # Minimum MCS level
+system_config.mcs_max = 9         # Maximum MCS level
+Architecture Details
+Hybrid Dual-Agent Design
+┌─────────────────┐    ┌─────────────────┐
+│   MAC Agent     │    │   PHY Agent     │
+│                 │    │                 │
+│ • Beacon Rate   │    │ • Power Control │
+│ • MCS Selection │    │ • SINR Optimize │
+│ • CBR Control   │    │ • Coverage      │
+│ • Channel Aware │    │ • Interference  │
+└─────────────────┘    └─────────────────┘
+         │                       │
+         └───────┬───────────────┘
+                 │
+    ┌─────────────────────────┐
+    │  Centralized Training  │
+    │     Manager            │
+    │                        │
+    │ • Gradient Conflict    │
+    │   Prevention           │
+    │ • Collective Learning  │
+    │ • Density Adaptation   │
+    └─────────────────────────┘
+                 │
+    ┌─────────────────────────┐
+    │ Realistic Density       │
+    │    Configuration        │
+    │                         │
+    │ • Channel Modeling      │
+    │ • Traffic Standards     │
+    │ • Adaptive Thresholds   │
+    └─────────────────────────┘
+Density-Aware Channel Adaptation
+Density LevelChannel ModelMAC StrategyPHY StrategyLight (≤120 vehicles/km)AWGN/R-LOSHigher beacon rates, efficient MCSIncrease power for coverageModerate (120-240 vehicles/km)H-LOS/H-NLOSBalanced approachAdaptive power controlHeavy (240-360 vehicles/km)C-NLOS-ENHLower beacon rates, robust MCSReduce power, minimize interferenceGridlock (360-480 vehicles/km)C-NLOS-ENH ExtremeMinimal beaconing, survival MCSExtreme power reduction
+Output Files
+Training Reports
+
+Excel Analysis: rl_performance_report_YYYYMMDD_HHMMSS.xlsx
+
+Summary Statistics with density breakdown
+Performance Analysis across channel conditions
+Configuration Details with realistic parameters
+
+
+
+Model Persistence
+
+Shared Models: saved_models/shared_models_REASON_TIMESTAMP/
+
+shared_mac_agent.pth - MAC agent neural network
+shared_phy_agent.pth - PHY agent neural network
+vehicle_*_params.json - Individual vehicle states
+
+
+
+Real-time Monitoring
+
+Logs: dual_agent_logs/dual_agent_rl_system.log
+TensorBoard: dual_agent_logs/vehicle_*/ (if enabled)
+
+Performance Metrics
+Key Performance Indicators
+
+CBR (Channel Busy Ratio): Adaptive targets (0.60-0.75) based on density
+SINR: Dynamic targets (12-25 dB) based on channel conditions
+Network Throughput: Maximized through intelligent parameter selection
+Density Adaptation: Response speed to traffic condition changes
+Channel Efficiency: Performance across different propagation models
+
+Density-Specific Metrics
+
+Light Traffic Performance: Coverage maximization effectiveness
+Heavy Traffic Performance: Interference minimization success
+Gridlock Survival: Network connectivity maintenance
+Transition Adaptation: Smooth adaptation between density scenarios
+
+Usage Examples
+Realistic Highway Scenario
+python# Configure for highway with varying density
+SCRIPT_MODE = "training"
+training_config = ConservativeTrainingConfig()  # Stable for varying conditions
+training_config.max_neighbors = 30              # Support moderate density
+ENABLE_TENSORBOARD = True
+Urban Intersection (High Density)
+python# Configure for dense urban traffic
+training_config = AggressiveTrainingConfig()
+training_config.max_neighbors = 50              # Support gridlock scenarios
+training_config.min_exploration = 0.15          # Strong exploitation
+Mixed Traffic Scenarios
+python# Adaptive configuration for mixed conditions
+training_config = TrainingConfigOptimum()       # Balanced approach
+training_config.max_neighbors = 40              # Handle heavy traffic
+training_config.exploration_decay = 0.9998      # Gradual adaptation
+Advanced Features
+Realistic Traffic Modeling
+
+Vehicle Density Standards: Based on real-world traffic engineering
+Channel Propagation Models: IEEE 802.11bd compliant channel modeling
+Adaptive Configuration: Dynamic parameter adjustment based on traffic conditions
+Gridlock Handling: Specialized algorithms for extreme density scenarios
+
+Channel-Aware Optimization
+
+AWGN/R-LOS: Optimized for open highway scenarios
+H-LOS/H-NLOS: Suburban and light urban environments
+C-NLOS-ENH: Dense urban with significant obstruction
+Extreme Scenarios: Tunnel, underground, extreme weather conditions
+
+Troubleshooting
+Common Issues
+Density Adaptation Not Working
+[WARNING] Density 600 exceeds realistic maximum (480), capped to gridlock scenario
+Solution: The system automatically caps unrealistic densities. This is expected behavior.
+Channel Model Conflicts
+[ERROR] Unknown channel model in density configuration
+Solution: Ensure density estimation is within realistic bounds (60-480 vehicles/km).
+Training Instability in High Density
+[TRAINING] Very high neighbor count affecting convergence
+Solution: Use ConservativeTrainingConfig for high-density scenarios, or reduce max_neighbors.
+Performance Optimization
+Poor High-Density Performance
+
+Use AggressiveTrainingConfig with strong power penalties
+Increase cooperation weights (W5) for better coordination
+Monitor C-NLOS-ENH channel adaptation
+
+Inefficient Low-Density Coverage
+
+Reduce power penalties for coverage optimization
+Increase beacon rate rewards for connectivity
+Use AWGN/R-LOS optimized parameters
+
+Research Applications
+
+Realistic VANET Scenarios: Highway, urban, mixed traffic optimization
+Channel-Aware Networking: Adaptive protocols for different propagation conditions
+Traffic Engineering: Density-aware network optimization
+Standards Compliance: IEEE 802.11bd realistic implementation
+Multi-Scenario Training: Robust algorithms across traffic conditions
+
+Technical Specifications
+Realistic Density Support
+
+Maximum Density: 480 vehicles/km (realistic gridlock)
+Minimum Density: 60 vehicles/km (sparse highway)
+Channel Models: 5 different propagation scenarios
+Adaptive Intervals: Dynamic training frequency based on density
+
+Enhanced Safety Features
+
+Realistic Bounds: Based on vehicular communication standards
+Density Capping: Prevents unrealistic scenario modeling
+Channel Validation: Ensures appropriate model selection
+Graceful Degradation: Maintains functionality in extreme scenarios
+
+License
+This project is licensed under the MIT License.
+Acknowledgments
+
+IEEE 802.11bd Standard: For realistic channel modeling specifications
+Traffic Engineering Research: For vehicular density standards and realistic scenarios
+PyTorch Team: For the excellent deep learning framework
+SAC Algorithm: Soft Actor-Critic research and implementations
 
 ## ✨ Key Features
 
