@@ -91,6 +91,9 @@ system_config.beacon_rate_min = 1 # Minimum beacon rate (Hz)
 system_config.beacon_rate_max = 20 # Maximum beacon rate (Hz)
 system_config.mcs_min = 0         # Minimum MCS level
 system_config.mcs_max = 9         # Maximum MCS level
+
+
+
 Architecture Details
 Hybrid Dual-Agent Design
 ┌─────────────────┐    ┌─────────────────┐
@@ -122,6 +125,8 @@ Hybrid Dual-Agent Design
     │ • Traffic Standards     │
     │ • Adaptive Thresholds   │
     └─────────────────────────┘
+
+
 Density-Aware Channel Adaptation
 Density LevelChannel ModelMAC StrategyPHY StrategyLight (≤120 vehicles/km)AWGN/R-LOSHigher beacon rates, efficient MCSIncrease power for coverageModerate (120-240 vehicles/km)H-LOS/H-NLOSBalanced approachAdaptive power controlHeavy (240-360 vehicles/km)C-NLOS-ENHLower beacon rates, robust MCSReduce power, minimize interferenceGridlock (360-480 vehicles/km)C-NLOS-ENH ExtremeMinimal beaconing, survival MCSExtreme power reduction
 Output Files
