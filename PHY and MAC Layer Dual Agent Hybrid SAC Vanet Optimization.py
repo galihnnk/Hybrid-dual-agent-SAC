@@ -266,39 +266,84 @@ class RealisticDensityConfig:
     """Channel-aware configurations based on realistic vehicular standards"""
     
     @staticmethod
-    def get_config_for_density(vehicles_per_km: int):
-        """Get optimal configuration based on REALISTIC vehicle density"""
+    def get_config_for_density(vehicles_per_km_per_direction: int):
+        """Get optimal configuration based on REALISTIC vehicle density per direction"""
         
-        if vehicles_per_km <= 120:  # Light traffic (30-60 vehicles/km/direction)
+        if vehicles_per_km_per_direction <= 30:  # Very sparse (AWGN)
+            return {
+                'max_neighbors': 15,
+                'channel_model': 0,  # AWGN from your table
+                'effective_spacing': 100.0,
+                'exploration_factor': 3.0,  # Higher exploration for sparse
+                'density_thresholds': [0.1, 0.3],
+                'cbr_target_base': 0.55,  # Very low CBR for minimal traffic
+                'sinr_target_base': 30.0,  # Excellent SINR with AWGN
+                'hidden_units': 256,
+                'train_interval': 3,
+                'power_penalty': 0.5,  # Very low penalty, coverage critical
+                'beacon_penalty': 0.4   # Encourage beaconing for connectivity
+            }
+        elif vehicles_per_km_per_direction <= 60:  # Light rural (R-LOS)
             return {
                 'max_neighbors': 20,
-                'channel_model': 'AWGN_R-LOS',
+                'channel_model': 1,  # R-LOS from your table
+                'effective_spacing': 50.0,
                 'exploration_factor': 2.5,
                 'density_thresholds': [0.2, 0.4],
-                'cbr_target_base': 0.60,  # Lower CBR for sparse traffic
-                'sinr_target_base': 25.0,  # Higher SINR possible with AWGN/R-LOS
+                'cbr_target_base': 0.60,  # Low CBR for light traffic
+                'sinr_target_base': 25.0,  # High SINR with R-LOS
                 'hidden_units': 256,
                 'train_interval': 4,
-                'power_penalty': 0.8,  # Lower penalty, coverage important
-                'beacon_penalty': 0.6   # Encourage beaconing for connectivity
+                'power_penalty': 0.8,  # Low penalty, coverage important
+                'beacon_penalty': 0.6   # Encourage beaconing
             }
-        elif vehicles_per_km <= 240:  # Moderate traffic (60-120 vehicles/km/direction)
+        elif vehicles_per_km_per_direction <= 90:  # Moderate highway (H-LOS)
+            return {
+                'max_neighbors': 25,
+                'channel_model': 4,  # H-LOS from your table
+                'effective_spacing': 33.3,
+                'exploration_factor': 2.2,
+                'density_thresholds': [0.25, 0.5],
+                'cbr_target_base': 0.62,  # Moderate CBR
+                'sinr_target_base': 22.0,  # Good SINR with H-LOS
+                'hidden_units': 320,
+                'train_interval': 5,
+                'power_penalty': 0.9,   # Moderate penalty
+                'beacon_penalty': 0.8   # Moderate beacon control
+            }
+        elif vehicles_per_km_per_direction <= 120:  # Dense highway (H-NLOS)
             return {
                 'max_neighbors': 30,
-                'channel_model': 'H-LOS_H-NLOS',
+                'channel_model': 5,  # H-NLOS from your table
+                'effective_spacing': 25.0,
                 'exploration_factor': 2.0,
                 'density_thresholds': [0.3, 0.6],
                 'cbr_target_base': 0.65,  # Standard CBR
-                'sinr_target_base': 20.0,  # Moderate SINR with some fading
+                'sinr_target_base': 20.0,  # Moderate SINR with H-NLOS
                 'hidden_units': 384,
                 'train_interval': 6,
                 'power_penalty': 1.0,   # Standard penalty
                 'beacon_penalty': 1.0   # Standard beacon control
             }
-        elif vehicles_per_km <= 360:  # Heavy traffic (120-180 vehicles/km/direction)
+        elif vehicles_per_km_per_direction <= 150:  # Urban highway (UA-LOS-ENH)
+            return {
+                'max_neighbors': 35,
+                'channel_model': 7,  # UA-LOS-ENH from your table
+                'effective_spacing': 20.0,
+                'exploration_factor': 1.8,
+                'density_thresholds': [0.35, 0.65],
+                'cbr_target_base': 0.67,  # Higher CBR tolerance
+                'sinr_target_base': 18.0,  # Lower SINR due to urban effects
+                'hidden_units': 448,
+                'train_interval': 7,
+                'power_penalty': 1.2,   # Higher penalty for interference
+                'beacon_penalty': 1.3   # Stronger beacon control
+            }
+        elif vehicles_per_km_per_direction <= 180:  # Congested urban (C-NLOS-ENH)
             return {
                 'max_neighbors': 40,
-                'channel_model': 'C-NLOS-ENH',
+                'channel_model': 8,  # C-NLOS-ENH from your table
+                'effective_spacing': 16.7,
                 'exploration_factor': 1.5,
                 'density_thresholds': [0.4, 0.7],
                 'cbr_target_base': 0.70,  # Higher CBR tolerance
@@ -308,14 +353,29 @@ class RealisticDensityConfig:
                 'power_penalty': 1.5,   # Higher penalty for interference
                 'beacon_penalty': 1.8   # Strong beacon control
             }
-        else:  # Gridlock (180-240 vehicles/km/direction) - MAX 480 total
+        elif vehicles_per_km_per_direction <= 210:  # Severe congestion (C-NLOS-ENH)
+            return {
+                'max_neighbors': 45,
+                'channel_model': 8,  # C-NLOS-ENH from your table
+                'effective_spacing': 14.3,
+                'exploration_factor': 1.3,
+                'density_thresholds': [0.45, 0.75],
+                'cbr_target_base': 0.72,  # High CBR tolerance
+                'sinr_target_base': 14.0,  # Low SINR due to severe congestion
+                'hidden_units': 512,
+                'train_interval': 10,
+                'power_penalty': 2.0,   # Very high penalty
+                'beacon_penalty': 2.2   # Very strong beacon control
+            }
+        else:  # Extreme gridlock (C-NLOS-ENH) - vehicles_per_km_per_direction > 210
             return {
                 'max_neighbors': 50,
-                'channel_model': 'C-NLOS-ENH_EXTREME',
+                'channel_model': 8,  # C-NLOS-ENH from your table
+                'effective_spacing': 12.5,
                 'exploration_factor': 1.2,
                 'density_thresholds': [0.5, 0.8],
                 'cbr_target_base': 0.75,  # Very high CBR tolerance
-                'sinr_target_base': 12.0,  # Low SINR due to extreme obstruction
+                'sinr_target_base': 12.0,  # Very low SINR due to extreme obstruction
                 'hidden_units': 512,
                 'train_interval': 12,
                 'power_penalty': 2.5,   # EXTREME penalty for interference
